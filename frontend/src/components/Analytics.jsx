@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
-const API = "http://localhost:8000";
+const API = process.env.REACT_APP_API_URL;
 
 const MetricCard = ({ label, value, sub, color }) => (
   <div style={{
