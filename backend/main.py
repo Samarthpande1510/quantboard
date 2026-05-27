@@ -39,10 +39,8 @@ def add_stock(data: PortfolioCreate, db: Session = Depends(get_db), user_id: int
     
     if dat.info.get('trailingPegRatio') is None and df.empty:
         raise HTTPException(status_code=404, detail=f"Ticker '{data.ticker}' not found")
-    try:
-        current_price = dat.fast_info['lastPrice']
-    except Exception:
-        current_price = df['Close'].iloc[-1]
+    
+    current_price = df['Close'].iloc[-1]
 
     stock = Portfolio(
         user_id=user_id,
