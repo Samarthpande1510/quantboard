@@ -37,7 +37,7 @@ def add_stock(data: PortfolioCreate, db: Session = Depends(get_db), user_id: int
     stock = Portfolio(
         user_id=user_id,
         ticker=data.ticker,
-        buy_price = current_price["current_price"],
+        buy_price = float(current_price["current_price"]),
         shares=data.shares,
         created_at=datetime.now(timezone.utc)
     )
