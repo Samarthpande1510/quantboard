@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import axios from "react-env"; // Adjusted slightly per your project imports if needed, otherwise 'axios'
-import axios from "axios";
 
 const API = process.env.REACT_APP_API_URL;
 
