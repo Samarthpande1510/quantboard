@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from datetime import datetime, timezone
 app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
-from analytics import get_analytics, validate
+from analytics import get_analytics
 from routes import router as user_router, get_current_user
 app.include_router(user_router)
 
@@ -33,13 +33,13 @@ class Response(BaseModel):
     created_at: datetime
 @app.post("/portfolio/")
 def add_stock(data: PortfolioCreate, db: Session = Depends(get_db), user_id: int =  Depends(get_current_user)):
-    current_price = validate(data.ticker)
+    current_price = get_analytics(data.ticker)
     stock = Portfolio(
         user_id=user_id,
         ticker=data.ticker,
-        buy_price = current_price,
+        buy_price = current_price["current_price"],
         shares=data.shares,
-        created_at=timezone.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
     db.add(stock)
     db.commit()
