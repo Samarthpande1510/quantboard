@@ -11,9 +11,11 @@ from datetime import datetime, timezone
 app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
 from analytics import get_analytics
+from analytics import router as analytics_router
 from routes import router as user_router
-app.include_router(user_router)
 
+app.include_router(user_router)
+app.include_router(analytics_router)
 from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
@@ -53,7 +55,6 @@ def add_stock(data: PortfolioCreate, db: Session = Depends(get_db),credentials: 
     db.commit()
     db.refresh(stock)
     return stock
-@app.get("/portfolio/", response_model=List[Response])
 
 @app.get("/portfolio/")
 def get_portfolio(
@@ -110,7 +111,3 @@ def delete(port_id:int ,credentials: HTTPAuthorizationCredentials = Security(sec
     db.commit()
     return {"message": "Position deleted successfully", "id": port_id}
 
-@app.delete("/portfolio/{port_id}")
-@app.get("/analytics/{ticker}")
-def analytics(ticker: str):
-    return get_analytics(ticker) 

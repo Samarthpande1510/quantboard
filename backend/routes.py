@@ -37,8 +37,3 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     return {"token": token, "user_id": existing.id}
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    payload = decode(token)
-    if not payload:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-    return payload["user_id"]
