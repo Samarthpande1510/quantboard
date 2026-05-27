@@ -5,7 +5,7 @@ from typing import Optional, List
 from database import Base, engine, get_db
 from model import Portfolio
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone
 app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
 from analytics import get_analytics
@@ -47,7 +47,7 @@ def add_stock(data: PortfolioCreate, db: Session = Depends(get_db), user_id: int
         ticker=data.ticker,
         buy_price = current_price,
         shares=data.shares,
-        created_at=datetime.utcnow()
+        created_at=timezone.utcnow()
     )
     db.add(stock)
     db.commit()
