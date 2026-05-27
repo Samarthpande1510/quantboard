@@ -24,7 +24,20 @@ export default function Portfolio({ token }) {
     setLoading(false);
   };
 
-  useEffect(() => { loadPortfolio(); }, [token]);
+  useEffect(() => {
+    // 1. Fetch immediately when the page loads
+    loadPortfolio();
+
+    // 2. Set up the automatic background trigger every 60 seconds
+    const intervalId = setInterval(() => {
+      // We pass a custom flag or bypass changing the full screen 'loading' state 
+      // here if we want completely silent background updates.
+      loadPortfolio();
+    }, 60000); // 60000 milliseconds = 60 seconds
+
+    // 3. Cleanup: Clear the timer immediately if the component unmounts
+    return () => clearInterval(intervalId);
+  }, [token]);
 
   const addStock = async () => {
     if (!ticker || !shares) { setError("All fields are required"); return; }
