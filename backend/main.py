@@ -10,7 +10,7 @@ app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
 from analytics import get_analytics
 from routes import router as user_router, get_current_user
-from yfinance import yf
+import yfinance as yf
 app.include_router(user_router)
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,14 +40,14 @@ def add_stock(data: PortfolioCreate, db: Session = Depends(get_db), user_id: int
     if dat.info.get('trailingPegRatio') is None and df.empty:
         raise HTTPException(status_code=404, detail=f"Ticker '{data.ticker}' not found")
     try:
-        price = dat.fast_info['lastprice']
+        current_price = dat.fast_info['lastPrice']
     except Exception:
         current_price = df['Close'].iloc[-1]
 
     stock = Portfolio(
         user_id=user_id,
         ticker=data.ticker,
-        current_price = current_price,
+        buy_price = current_price,
         shares=data.shares,
         created_at=datetime.utcnow()
     )
