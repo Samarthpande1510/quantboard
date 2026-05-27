@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "react-env"; // Adjusted slightly per your project imports if needed, otherwise 'axios'
 import axios from "axios";
 
 const API = process.env.REACT_APP_API_URL;
@@ -7,7 +8,6 @@ export default function Portfolio({ token }) {
   const [stocks, setStocks] = useState([]);
   const [ticker, setTicker] = useState("");
   const [shares, setShares] = useState("");
-  const [buyPrice, setBuyPrice] = useState("");
   const [loading, setLoading] = useState(false);
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
@@ -28,15 +28,14 @@ export default function Portfolio({ token }) {
   useEffect(() => { loadPortfolio(); }, [token]);
 
   const addStock = async () => {
-    if (!ticker || !shares || !buyPrice) { setError("All fields are required"); return; }
+    if (!ticker || !shares) { setError("All fields are required"); return; }
     setAdding(true); setError("");
     try {
       await axios.post(`${API}/portfolio/`, {
         ticker: ticker.toUpperCase(),
-        shares: parseFloat(shares),
-        buy_price: parseFloat(buyPrice)
+        shares: parseFloat(shares)
       }, { headers });
-      setTicker(""); setShares(""); setBuyPrice("");
+      setTicker(""); setShares("");
       const res = await axios.get(`${API}/portfolio/`, { headers });
       setStocks(res.data);
     } catch (e) {
@@ -87,7 +86,8 @@ export default function Portfolio({ token }) {
         <h3 style={{ fontSize: "14px", fontWeight: "600", marginBottom: "1.25rem", color: "var(--text)" }}>
           Add position
         </h3>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+        {/* Adjusted grid column layout from 2fr 1fr 1fr down to 2fr 1fr since price is automated */}
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "12px", marginBottom: "12px" }}>
           <div>
             <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "var(--muted)", marginBottom: "6px" }}>
               Ticker symbol
@@ -105,15 +105,7 @@ export default function Portfolio({ token }) {
             <input
               type="number" value={shares} onChange={e => setShares(e.target.value)}
               placeholder="10"
-            />
-          </div>
-          <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "var(--muted)", marginBottom: "6px" }}>
-              Buy price ($)
-            </label>
-            <input
-              type="number" value={buyPrice} onChange={e => setBuyPrice(e.target.value)}
-              placeholder="3500"
+              onKeyDown={e => e.key === "Enter" && addStock()}
             />
           </div>
         </div>
