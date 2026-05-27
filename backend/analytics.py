@@ -6,7 +6,7 @@ app = FastAPI()
 
 def get_analytics(ticker: str):
     dat = yf.Ticker(ticker)
-    df = dat.history(period="3mo")
+    df = dat.history(period="2mo")
     
     if df.empty:
         raise HTTPException(status_code=404, detail=f"Ticker '{ticker}' not found")
@@ -36,17 +36,6 @@ def get_analytics(ticker: str):
         "signal": signal,
         "historical_prices": historical_dict
     }
-
-def validate(ticker: str):
-    dat = yf.Ticker(ticker)
-    df = dat.history(period="1mo")
-    
-    if df.empty:
-        raise HTTPException(status_code=404, detail=f"Ticker '{ticker}' not found")
-    
-    current_price = df['Close'].iloc[-1]
-    return current_price
-
 @app.get("/analytics/{ticker}")
 def analytics(ticker: str):
     return get_analytics(ticker)
