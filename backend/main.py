@@ -1,5 +1,7 @@
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from auth import decode
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from database import Base, engine, get_db
@@ -55,6 +57,21 @@ def get_portfolio(db: Session = Depends(get_db),user_id: int = Depends(get_curre
 def root():
     return {"message": "QuantBoard API is running"}
 
+security = HTTPBearer()
+
+@app.delete("/portfolio/{port_id}")
+def delete(port_id:int ,credentials: HTTPAuthorizationCredentials = Security(security),db: Session = Depends(get_db)):
+    token = credentials.credentials
+    payload = decode(token)
+    if not payload:
+        raise HTTPException(status_code=401,detail="Invalid token")
+    user_id = payload["user_id"]
+    port = db.query(Portfolio).filter(Portfolio.id == port_id).first()
+    if not port:
+        raise HTTPException(status_code=403, detail="No such portfolio")
+    db.delete(port)
+    db.commit()
+    
 @app.get("/analytics/{ticker}")
 def analytics(ticker: str):
     return get_analytics(ticker) 

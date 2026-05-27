@@ -43,6 +43,19 @@ export default function Portfolio({ token }) {
     setAdding(false);
   };
 
+  // ✅ New Handler: Calls the DELETE endpoint and updates local state
+  const deleteStock = async (portId) => {
+    if (!window.confirm("Are you sure you want to sell this entire position?")) return;
+    setError("");
+    try {
+      await axios.delete(`${API}/portfolio/${portId}`, { headers });
+      // Optimistically filter out the sold stock from the UI list without extra network overhead
+      setStocks(stocks.filter(stock => stock.id !== portId));
+    } catch (e) {
+      setError(e.response?.data?.detail || "Failed to execute sell order");
+    }
+  };
+
   const totalValue = stocks.reduce((sum, s) => sum + s.shares * s.buy_price, 0);
 
   return (
@@ -85,13 +98,17 @@ export default function Portfolio({ token }) {
         <h3 style={{ fontSize: "14px", fontWeight: "600", marginBottom: "1.25rem", color: "var(--text)" }}>
           Add position
         </h3>
-        {/* Adjusted grid column layout from 2fr 1fr 1fr down to 2fr 1fr since price is automated */}
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "12px", marginBottom: "12px" }}>
           <div>
             <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "var(--muted)", marginBottom: "6px" }}>
               Ticker symbol
             </label>
             <input
+              style={{
+                width: "100%", padding: "10px 14px", background: "var(--bg)", 
+                border: "1px solid var(--border)", borderRadius: "6px", color: "var(--text)",
+                fontSize: "14px", outline: "none"
+              }}
               value={ticker} onChange={e => setTicker(e.target.value)}
               placeholder="e.g. TCS.NS"
               onKeyDown={e => e.key === "Enter" && addStock()}
@@ -102,6 +119,11 @@ export default function Portfolio({ token }) {
               Shares
             </label>
             <input
+              style={{
+                width: "100%", padding: "10px 14px", background: "var(--bg)", 
+                border: "1px solid var(--border)", borderRadius: "6px", color: "var(--text)",
+                fontSize: "14px", outline: "none"
+              }}
               type="number" value={shares} onChange={e => setShares(e.target.value)}
               placeholder="10"
               onKeyDown={e => e.key === "Enter" && addStock()}
@@ -122,10 +144,9 @@ export default function Portfolio({ token }) {
           onClick={addStock} disabled={adding}
           style={{
             padding: "10px 20px", background: adding ? "var(--muted2)" : "var(--accent)",
-            color: "#fff", fontWeight: "500", fontSize: "14px", borderRadius: "6px"
+            color: "#fff", fontWeight: "500", fontSize: "14px", borderRadius: "6px",
+            border: "none", cursor: adding ? "not-allowed" : "pointer"
           }}
-          onMouseEnter={e => !adding && (e.target.style.background = "var(--accent-hover)")}
-          onMouseLeave={e => !adding && (e.target.style.background = "var(--accent)")}
         >
           {adding ? "Adding..." : "Add position"}
         </button>
@@ -150,7 +171,8 @@ export default function Portfolio({ token }) {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg3)" }}>
-                {["Ticker", "Shares", "Buy price", "Position value", "Added"].map(h => (
+                {/* ✅ Added Action title context header mapping */}
+                {["Ticker", "Shares", "Buy price", "Position value", "Added", "Action"].map(h => (
                   <th key={h} style={{
                     padding: "11px 16px", textAlign: "left",
                     fontSize: "12px", color: "var(--muted)",
@@ -182,6 +204,28 @@ export default function Portfolio({ token }) {
                   </td>
                   <td style={{ padding: "13px 16px", fontSize: "13px", color: "var(--muted)" }}>
                     {new Date(s.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                  </td>
+                  {/* ✅ The interactive Sell Button cell column element */}
+                  <td style={{ padding: "13px 16px" }}>
+                    <button
+                      onClick={() => deleteStock(s.id)}
+                      style={{
+                        padding: "4px 10px", background: "transparent",
+                        color: "var(--red)", border: "1px solid var(--red)",
+                        fontSize: "12px", fontWeight: "500", borderRadius: "4px",
+                        cursor: "pointer", transition: "all 0.15s"
+                      }}
+                      onMouseEnter={e => {
+                        e.target.style.background = "var(--red)";
+                        e.target.style.color = "#fff";
+                      }}
+                      onMouseLeave={e => {
+                        e.target.style.background = "transparent";
+                        e.target.style.color = "var(--red)";
+                      }}
+                    >
+                      Sell All
+                    </button>
                   </td>
                 </tr>
               ))}
