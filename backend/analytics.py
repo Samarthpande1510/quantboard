@@ -37,6 +37,16 @@ def get_analytics(ticker: str):
         "historical_prices": historical_dict
     }
 
+def validate(ticker: str):
+    dat = yf.Ticker(ticker)
+    df = dat.history(period="3mo")
+    
+    if dat.info.get('trailingPegRatio') is None and df.empty:
+        raise HTTPException(status_code=404, detail=f"Ticker '{ticker}' not found")
+    
+    current_price = df['Close'].iloc[-1]
+    return current_price
+
 @app.get("/analytics/{ticker}")
 def analytics(ticker: str):
     return get_analytics(ticker)

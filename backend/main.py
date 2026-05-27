@@ -8,9 +8,8 @@ from pydantic import BaseModel
 from datetime import datetime, timezone
 app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
-from analytics import get_analytics
+from analytics import get_analytics, validate
 from routes import router as user_router, get_current_user
-import yfinance as yf
 app.include_router(user_router)
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,14 +33,7 @@ class Response(BaseModel):
     created_at: datetime
 @app.post("/portfolio/")
 def add_stock(data: PortfolioCreate, db: Session = Depends(get_db), user_id: int =  Depends(get_current_user)):
-    dat = yf.Ticker(data.ticker)
-    df = dat.history(period="3mo")
-    
-    if dat.info.get('trailingPegRatio') is None and df.empty:
-        raise HTTPException(status_code=404, detail=f"Ticker '{data.ticker}' not found")
-    
-    current_price = df['Close'].iloc[-1]
-
+    current_price = validate(data.ticker)
     stock = Portfolio(
         user_id=user_id,
         ticker=data.ticker,
