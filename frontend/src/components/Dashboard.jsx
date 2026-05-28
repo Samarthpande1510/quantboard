@@ -9,7 +9,7 @@ export default function Dashboard({ user, onLogout }) {
     <div style={s.root}>
       {/* Sidebar */}
       <aside style={s.sidebar}>
-        <div style={s.logo}>QB</div>
+        <div style={s.logo}>QuantBoard</div>
         <nav style={s.nav}>
           {[
             { id: "analytics", icon: "◈", label: "Analytics" },
@@ -41,7 +41,7 @@ export default function Dashboard({ user, onLogout }) {
         {/* Top bar */}
         <div style={s.topbar}>
           <div>
-            <p style={s.greeting}>Good day, {user?.email?.split("@")[0] || "Trader"}</p>
+            <p style={s.greeting}>Good day, {user?.name?.split("@")[0] || "Trader"}</p>
             <p style={s.subgreeting}>Here's what's moving today</p>
           </div>
           <div style={s.topbarRight}>
