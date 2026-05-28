@@ -55,11 +55,6 @@ def get_analytics(ticker: str):
     }
 
 @router.get("/analytics/{ticker}")
-def analysis(ticker: str):
-    stock = get_analytics(ticker)
-    return stock
-
-@router.get("/analyze/{ticker}")
 def analyze(ticker: str,db: Session = Depends(get_db),credentials: HTTPAuthorizationCredentials = Security(security)):
     token = credentials.credentials
     payload = decode(token)
