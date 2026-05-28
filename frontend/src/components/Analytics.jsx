@@ -195,7 +195,7 @@ export default function Analytics({ token }) {
     if (!ticker.trim()) return;
     setAnalyzing(true);
     try {
-      const res = await axios.get(`${API}/analytics/${ticker.toUpperCase()}`, {
+      const res = await axios.get(`${API}/analyze/${ticker.toUpperCase()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAnalysis(res.data);
